@@ -25,7 +25,7 @@ jobs:
           distribution: temurin
           java-version: '25'
       - name: Install Android SDK platform
-        run: sdkmanager "platforms;android-37" "build-tools;37.0.0"
+        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
       - name: Build and check
         run: ./gradlew :signkit:assembleRelease :signkit:lintRelease :signkit:testDebugUnitTest :app:assembleDebug :app:testDebugUnitTest --no-daemon
       - name: Package release assets
