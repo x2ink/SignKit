@@ -2,38 +2,81 @@ name: Publish release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
+    paths:
+      - '.github/release-request.json'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to publish
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref }}
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      sha: ${{ steps.source.outputs.sha }}
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - name: Resolve version tag
+        id: release
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          if os.environ.get('INPUT_TAG'):
+              tag = os.environ['INPUT_TAG']
+          elif os.environ['GITHUB_REF_TYPE'] == 'tag':
+              tag = os.environ['GITHUB_REF_NAME']
+          else:
+              tag = json.loads(Path('.github/release-request.json').read_text())['tag']
+          if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', tag):
+              raise SystemExit('Expected a stable version tag such as v1.0.0')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'tag={tag}\n')
+          PY
+      - name: Check out tagged source
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          persist-credentials: false
+      - name: Record source commit
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '25'
-      - name: Install Android SDK platform
-        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - name: Set up Android SDK and command-line tools
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-37.0 build-tools;37.0.0'
+          log-accepted-android-sdk-licenses: false
       - name: Build and check
         run: ./gradlew :signkit:assembleRelease :signkit:lintRelease :signkit:testDebugUnitTest :app:assembleDebug :app:testDebugUnitTest --no-daemon
       - name: Package release assets
-        run: ./scripts/package-release.sh "$GITHUB_REF_NAME"
+        run: ./scripts/package-release.sh "${{ steps.release.outputs.tag }}"
       - uses: actions/upload-artifact@v4
         with:
           name: release-assets
-          path: build/releases/${{ github.ref_name }}/
+          path: build/releases/${{ steps.release.outputs.tag }}/
           if-no-files-found: error
           retention-days: 7
 
@@ -46,6 +89,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: ${{ needs.build.outputs.tag }}
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
@@ -55,12 +99,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+          SOURCE_SHA: ${{ needs.build.outputs.sha }}
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          gh release create "$GITHUB_REF_NAME" \
+          version="${RELEASE_TAG#v}"
+          gh release create "$RELEASE_TAG" \
             --verify-tag \
-            --target "$GITHUB_SHA" \
-            --title "SignKit $GITHUB_REF_NAME" \
+            --target "$SOURCE_SHA" \
+            --title "SignKit $RELEASE_TAG" \
             --notes-file "docs/releases/$version.md" \
             --latest \
             "release-assets/signkit-$version.aar" \

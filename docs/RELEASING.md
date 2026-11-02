@@ -30,3 +30,9 @@ To package locally after building:
 ```
 
 Assets are written to `build/releases/vX.Y.Z/`, which is ignored by Git. The demo is debug-signed and intended for evaluation. Release publication is separate from Maven Central publication.
+
+## Retry after a workflow fix
+
+Do not move or force-push a version tag. After fixing the workflow on `main`, set `.github/release-request.json` to the existing tag and increment its `request` number, then commit and push. This triggers a fresh run of the updated workflow, which explicitly checks out and builds the original tagged source. The SDK source and tag remain unchanged.
+
+An authenticated CLI can also trigger the workflow's manual `tag` input. SDK initialization is explicit through `android-actions/setup-android`; the workflow does not assume `sdkmanager` is already installed or on the runner's PATH.
