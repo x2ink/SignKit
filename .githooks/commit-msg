@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+HOOK_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
+. "$HOOK_DIR/commit-types.sh"
+
+subject=$(commit_subject "$1")
+if is_generated_subject "$subject"; then exit 0; fi
+if ! is_conventional_subject "$subject"; then
+    printf '%s\n' \
+        'Invalid commit subject. Use: type(optional-scope): description' \
+        "Allowed types: $COMMIT_TYPES" \
+        'Examples: feat: add signature export | fix(pen): smooth stroke endings' >&2
+    exit 1
+fi

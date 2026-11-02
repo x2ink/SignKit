@@ -1,0 +1,43 @@
+#!/bin/sh
+set -eu
+
+HOOK_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
+. "$HOOK_DIR/commit-types.sh"
+
+message_file=$1
+case "${2:-}" in merge) exit 0 ;; esac
+subject=$(commit_subject "$message_file")
+if is_conventional_subject "$subject" || is_generated_subject "$subject"; then exit 0; fi
+
+if ! ( : < /dev/tty ) 2>/dev/null; then
+    printf '%s\n' 'No terminal available. Supply a typed message, e.g. git commit -m "feat: add signature export".' >&2
+    exit 1
+fi
+
+index=1
+for type in $COMMIT_TYPES; do
+    printf '%2s) %s\n' "$index" "$type" > /dev/tty
+    index=$((index + 1))
+done
+selected_type=''
+while [ -z "$selected_type" ]; do
+    printf 'Commit type [1-11, default 1]: ' > /dev/tty
+    IFS= read -r choice < /dev/tty
+    choice=${choice:-1}
+    index=1
+    for type in $COMMIT_TYPES; do
+        if [ "$choice" = "$index" ] || [ "$choice" = "$type" ]; then selected_type=$type; break; fi
+        index=$((index + 1))
+    done
+    if [ -z "$selected_type" ]; then printf 'Choose a number or one of the listed types.\n' > /dev/tty; fi
+done
+
+if [ -n "$subject" ]; then
+    awk -v prefix="$selected_type: " '
+        !changed && $0 !~ /^[[:space:]]*(#|$)/ { print prefix $0; changed=1; next }
+        { print }
+    ' "$message_file" > "$message_file.signkit"
+else
+    { printf '%s: \n\n' "$selected_type"; cat "$message_file"; } > "$message_file.signkit"
+fi
+mv "$message_file.signkit" "$message_file"

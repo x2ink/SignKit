@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">SignKit</string>
+    <string name="undo">撤销</string>
+    <string name="clear">清空</string>
+    <string name="export_bitmap">导出 Bitmap</string>
+    <string name="stroke_width">笔宽上限：%1$d dp（动态范围 %2$.1f–%1$d dp，新笔画生效）</string>
+    <string name="stroke_width_default">笔宽上限：24 dp（动态范围 10.3–24 dp，新笔画生效）</string>
+    <string name="pen_mode_description">选择固定粗细、速度笔锋、压力或压力加速度模式</string>
+    <string name="pressure_hint">笔锋随速度变化；测试压感时切换压力模式，观察原值是否随轻重按变化</string>
+    <string name="pressure_idle">等待输入，显示本笔接触期间的压力范围</string>
+    <string name="pressure_values">压力原值：%1$.3f　接触范围：%2$.3f–%3$.3f　输入：%4$s</string>
+    <string name="tool_finger">手指</string>
+    <string name="tool_stylus">手写笔</string>
+    <string name="tool_mouse">鼠标</string>
+    <string name="tool_other">其他</string>
+    <string-array name="pen_modes">
+        <item>固定粗细</item>
+        <item>速度笔锋（参考 SignaturePad）</item>
+        <item>压力</item>
+        <item>压力＋速度笔锋</item>
+    </string-array>
+    <string name="stroke_width_description">调整笔画粗细，4 到 64 dp</string>
+    <string name="writing_idle">请在下方签名</string>
+    <string name="writing_started">开始书写</string>
+    <string name="writing_in_progress">正在书写</string>
+    <string name="writing_ended">结束书写</string>
+    <string name="signature_cleared">签名已清空</string>
+    <string name="signature_pad">签名区域</string>
+    <string name="export_hint">导出后在此预览</string>
+    <string name="export_size">最近导出：%1$d × %2$d px</string>
+    <string name="export_preview">导出的签名 Bitmap 预览</string>
+</resources>

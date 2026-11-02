@@ -1,0 +1,5 @@
+Portions adapted from android-signaturepad
+Copyright 2014-2025 Gianluca Cacace
+https://github.com/gcacace/android-signaturepad
+Licensed under the Apache License, Version 2.0.
+Modified for Kotlin, timestamped historical samples, per-stroke undo and pressure input.
