@@ -103,9 +103,9 @@ jobs:
           SOURCE_SHA: ${{ needs.build.outputs.sha }}
         run: |
           version="${RELEASE_TAG#v}"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           gh release create "$RELEASE_TAG" \
             --verify-tag \
-            --target "$SOURCE_SHA" \
             --title "SignKit $RELEASE_TAG" \
             --notes-file "docs/releases/$version.md" \
             --latest \

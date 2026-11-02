@@ -36,3 +36,5 @@ Assets are written to `build/releases/vX.Y.Z/`, which is ignored by Git. The dem
 Do not move or force-push a version tag. After fixing the workflow on `main`, set `.github/release-request.json` to the existing tag and increment its `request` number, then commit and push. This triggers a fresh run of the updated workflow, which explicitly checks out and builds the original tagged source. The SDK source and tag remain unchanged.
 
 An authenticated CLI can also trigger the workflow's manual `tag` input. SDK initialization is explicit through `android-actions/setup-android`; the workflow does not assume `sdkmanager` is already installed or on the runner's PATH.
+
+The publisher verifies the checked-out commit against the build output and requires an existing remote tag. It intentionally omits `gh release create --target`: GitHub may require workflow-write permission when an explicit historical target differs from the default branch's workflow files, even though the tag already exists. Omitting that unused creation parameter preserves the existing tag and allows the repository-scoped `contents: write` token to publish.
