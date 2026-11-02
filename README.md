@@ -68,6 +68,10 @@ Run `git commit` to choose a commit type interactively. A message already writte
 
 See [architecture](docs/ARCHITECTURE.md) and [contributing](docs/CONTRIBUTING.md).
 
+## Releases
+
+Download SDK binaries and the demo APK from [GitHub Releases](https://github.com/x2ink/SignKit/releases). Version tags trigger the build and publish workflow; see [releasing](docs/RELEASING.md).
+
 ## Acknowledgments
 
 Parts of the dynamic stroke implementation are adapted from [android-signaturepad](https://github.com/gcacace/android-signaturepad), licensed under Apache-2.0. Attribution and the upstream license are included in the library's `META-INF` resources.

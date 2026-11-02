@@ -47,3 +47,4 @@ flowchart LR
 ## Development
 
 - [Contributing and commit hooks](CONTRIBUTING.md)
+- [Tag-driven release workflow](RELEASING.md)
