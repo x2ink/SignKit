@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SignPadStartTest {
     @Test
-    fun movingStartDoesNotRetainIndependentDownDot() = withPad { pad ->
+    fun contactDotDoesNotExceedMovingStart() = withPad { pad ->
         for (mode in listOf(SignPadView.PenMode.VELOCITY, SignPadView.PenMode.PRESSURE_AND_VELOCITY)) {
             pad.clear()
             pad.penMode = mode
@@ -22,8 +22,8 @@ class SignPadStartTest {
             fastStroke(pad)
             val bitmap = pad.exportBitmap()
             assertTrue(
-                "Moving stroke must replace the DOWN preview: $mode",
-                thickness(bitmap, 40) < thickness(downDot, 40),
+                "DOWN preview must match the moving start: $mode",
+                thickness(downDot, 40) <= thickness(bitmap, 40) + 2,
             )
         }
     }
@@ -37,7 +37,7 @@ class SignPadStartTest {
         for (index in 1..10) touch(pad, MotionEvent.ACTION_MOVE, 40f + index * 20f, 1020L + index, 1f)
         touch(pad, MotionEvent.ACTION_UP, 240f, 1031L, 0f)
         val bitmap = pad.exportBitmap()
-        assertTrue(thickness(pressed, 40) > thickness(bitmap, 40))
+        assertTrue(thickness(pressed, 40) <= thickness(bitmap, 40) + 2)
         assertTrue(thickness(bitmap, 40) <= thickness(bitmap, 180) + 2)
     }
 
@@ -67,8 +67,8 @@ class SignPadStartTest {
     }
 
     @Test
-    fun dynamicTapStillLeavesPressureSizedDotAndCanUndo() = withPad { pad ->
-        pad.penMode = SignPadView.PenMode.PRESSURE_AND_VELOCITY
+    fun pressureOnlyTapStillLeavesPressureSizedDotAndCanUndo() = withPad { pad ->
+        pad.penMode = SignPadView.PenMode.PRESSURE
         val blank = pad.exportBitmap()
         touch(pad, MotionEvent.ACTION_DOWN, 40f, 1000L, 1f)
         val preview = pad.exportBitmap()

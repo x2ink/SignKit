@@ -11,6 +11,7 @@ import kotlin.math.hypot
 
 internal class VariableStroke(start: StrokeSample, private val model: StrokeWidthModel) {
     private data class WidthTransition(val start: Float, val end: Float, val maxGrowth: Float?)
+    private data class PendingCurve(val curve: CubicCurve, val length: Float)
 
     private val points = ArrayDeque<StrokeSample>().apply {
         addLast(start)
@@ -18,6 +19,8 @@ internal class VariableStroke(start: StrokeSample, private val model: StrokeWidt
     }
     private var hasMoved = false
     private var hasCommittedCurve = false
+    private val pendingCurves = ArrayDeque<PendingCurve>()
+    private var pendingLength = 0f
 
     fun append(target: Path, sample: StrokeSample) {
         val last = points.last()
@@ -37,8 +40,25 @@ internal class VariableStroke(start: StrokeSample, private val model: StrokeWidt
         hasMoved = true
         points.addLast(sample)
         if (points.size == 4) {
-            appendCurve(target, CubicCurve.through(points.toList()), model)
+            queueCurve(target, CubicCurve.through(points.toList()))
             points.removeFirst()
+        }
+    }
+
+    private fun queueCurve(target: Path, curve: CubicCurve) {
+        if (!model.usesVelocity) {
+            appendCurve(target, curve, model)
+            hasCommittedCurve = true
+            return
+        }
+        val pending = PendingCurve(curve, curve.length())
+        pendingCurves.addLast(pending)
+        pendingLength += pending.length
+        // 收笔减速可能跨越多个MOVE；保留按路程界定的末端，避免粗尾提前永久写入路径。
+        while (pendingCurves.isNotEmpty() && pendingLength - pendingCurves.first().length >= model.tailLength) {
+            val first = pendingCurves.removeFirst()
+            pendingLength -= first.length
+            appendCurve(target, first.curve, model)
             hasCommittedCurve = true
         }
     }
@@ -49,25 +69,29 @@ internal class VariableStroke(start: StrokeSample, private val model: StrokeWidt
             target.addCircle(point.x, point.y, model.tapWidth / 2f, Path.Direction.CW)
             return
         }
-        // 补齐末段用快照，预览与导出不得推进窗口或速度滤波状态。
+        // 预览和完成共用快照，重建整个末端，不推进队列或速度滤波状态。
+        val snapshot = model.snapshot()
+        var widthLimit = if (hasCommittedCurve) snapshot.width else Float.POSITIVE_INFINITY
+        for (pending in pendingCurves) {
+            widthLimit = appendCurve(target, pending.curve, snapshot, widthLimit)
+        }
         val tail = points.toMutableList().apply { add(last()) }
-        appendCurve(target, CubicCurve.through(tail), model.snapshot(), allowGrowth = !hasCommittedCurve)
+        appendCurve(target, CubicCurve.through(tail), snapshot, widthLimit)
     }
 
     private fun appendCurve(
         target: Path,
         curve: CubicCurve,
         widthModel: StrokeWidthModel,
-        allowGrowth: Boolean = true,
-    ) {
+        widthLimit: Float = Float.POSITIVE_INFINITY,
+    ): Float {
         val startWidth = widthModel.width
-        val endWidth = widthModel.accept(curve.end)
-        val growth = if (widthModel.usesVelocity) {
-            if (allowGrowth) 0.5f else 0f
-        } else {
-            null
-        }
+        val requestedWidth = widthModel.accept(curve.end)
+        // 首段按速度目标建立笔身上限；末端目标变细后不能因减速再次抬高上限。
+        val endWidth = if (widthModel.usesVelocity) minOf(requestedWidth, widthLimit) else requestedWidth
+        val growth = if (widthModel.usesVelocity) 0.5f else null
         widthModel.commitRenderedWidth(renderCurve(target, curve, WidthTransition(startWidth, endWidth, growth)))
+        return endWidth
     }
 
     private fun renderCurve(target: Path, curve: CubicCurve, transition: WidthTransition): Float {

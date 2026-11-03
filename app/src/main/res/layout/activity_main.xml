@@ -1,112 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#FFFFFF"
-        android:orientation="vertical"
+        android:fillViewport="true"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvStrokeWidth"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/stroke_width_default"
-            android:textColor="#212121" />
-
-        <SeekBar
-            android:id="@+id/sbStrokeWidth"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:contentDescription="@string/stroke_width_description"
-            android:min="4"
-            android:max="64"
-            android:progress="24" />
-
-        <Spinner
-            android:id="@+id/spPenMode"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:backgroundTint="#616161"
-            android:contentDescription="@string/pen_mode_description" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/pressure_hint"
-            android:textColor="#616161" />
-
-        <TextView
-            android:id="@+id/tvPressure"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/pressure_idle"
-            android:textColor="#212121" />
-
         <LinearLayout
-            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnUndo"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tvStrokeWidth"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/undo" />
+                android:text="@string/stroke_width_default"
+                android:textColor="#212121" />
 
-            <Button
-                android:id="@+id/btnClear"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/clear" />
+            <SeekBar
+                android:id="@+id/sbStrokeWidth"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:contentDescription="@string/stroke_width_description"
+                android:min="4"
+                android:max="64"
+                android:progress="24" />
 
-            <Button
-                android:id="@+id/btnExport"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
+            <Spinner
+                android:id="@+id/spPenMode"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:backgroundTint="#616161"
+                android:contentDescription="@string/pen_mode_description" />
+
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="@string/pressure_hint"
+                android:textColor="#616161" />
+
+            <TextView
+                android:id="@+id/tvPressure"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pressure_idle"
+                android:textColor="#212121" />
+
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnUndo"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:enabled="false"
+                    android:text="@string/undo" />
+
+                <Button
+                    android:id="@+id/btnClear"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/clear" />
+
+                <Button
+                    android:id="@+id/btnExport"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:enabled="false"
+                    android:text="@string/export_bitmap" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvWritingState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp"
+                android:text="@string/writing_idle"
+                android:textColor="#616161" />
+
+            <ink.x2.signkit.SignPadView
+                android:id="@+id/spvTest"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
                 android:layout_weight="1"
-                android:text="@string/export_bitmap" />
+                android:background="#F5F5F5"
+                android:contentDescription="@string/signature_pad" />
+
+            <TextView
+                android:id="@+id/tvExportInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp"
+                android:text="@string/export_hint"
+                android:textColor="#616161" />
+
+            <ImageView
+                android:id="@+id/ivExport"
+                android:layout_width="match_parent"
+                android:layout_height="96dp"
+                android:background="#EEEEEE"
+                android:contentDescription="@string/export_preview"
+                android:scaleType="fitCenter" />
+
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvWritingState"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
-            android:text="@string/writing_idle"
-            android:textColor="#616161" />
-
-        <ink.x2.signkit.SignPadView
-            android:id="@+id/spvTest"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#F5F5F5"
-            android:contentDescription="@string/signature_pad" />
-
-        <TextView
-            android:id="@+id/tvExportInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
-            android:text="@string/export_hint"
-            android:textColor="#616161" />
-
-        <ImageView
-            android:id="@+id/ivExport"
-            android:layout_width="match_parent"
-            android:layout_height="96dp"
-            android:background="#EEEEEE"
-            android:contentDescription="@string/export_preview"
-            android:scaleType="fitCenter" />
-
-    </LinearLayout>
+    </ScrollView>
 </layout>

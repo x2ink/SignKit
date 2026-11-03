@@ -115,6 +115,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun bindActions() {
+        binding.spvTest.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            updateExportAvailability()
+        }
+        updateExportAvailability()
         binding.btnUndo.setOnClickListener {
             binding.spvTest.undo()
             binding.btnUndo.isEnabled = binding.spvTest.canUndo
@@ -125,9 +129,19 @@ class MainActivity : AppCompatActivity() {
             binding.tvWritingState.setText(R.string.signature_cleared)
         }
         binding.btnExport.setOnClickListener {
+            if (!hasExportSize()) {
+                updateExportAvailability()
+                return@setOnClickListener
+            }
             val bitmap = binding.spvTest.exportBitmap(Color.WHITE)
             binding.ivExport.setImageBitmap(bitmap)
             binding.tvExportInfo.text = getString(R.string.export_size, bitmap.width, bitmap.height)
         }
+    }
+
+    private fun hasExportSize(): Boolean = binding.spvTest.width > 0 && binding.spvTest.height > 0
+
+    private fun updateExportAvailability() {
+        binding.btnExport.isEnabled = hasExportSize()
     }
 }

@@ -32,6 +32,9 @@ internal class StrokeWidthModel(private val settings: PenSettings, private val d
         get() = settings.mode == SignPadView.PenMode.VELOCITY ||
             settings.mode == SignPadView.PenMode.PRESSURE_AND_VELOCITY
 
+    val tailLength: Float
+        get() = settings.width * 2f
+
     fun beginMovement() {
         if (usesVelocity) width = minimumWidth
     }
@@ -42,8 +45,10 @@ internal class StrokeWidthModel(private val settings: PenSettings, private val d
 
     val tapWidth: Float
         get() = when (settings.mode) {
-            SignPadView.PenMode.FIXED, SignPadView.PenMode.VELOCITY -> settings.width
-            SignPadView.PenMode.PRESSURE, SignPadView.PenMode.PRESSURE_AND_VELOCITY -> pressureWidth()
+            SignPadView.PenMode.FIXED -> settings.width
+            // 无位移时没有速度依据，预览和点按必须与移动起笔同宽，避免先粗后细。
+            SignPadView.PenMode.VELOCITY, SignPadView.PenMode.PRESSURE_AND_VELOCITY -> minimumWidth
+            SignPadView.PenMode.PRESSURE -> pressureWidth()
         }
 
     fun updatePressure(value: Float) {

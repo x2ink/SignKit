@@ -110,6 +110,12 @@ class SignPadView @JvmOverloads constructor(
         drawSignature(canvas)
     }
 
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        // 禁用后不会再收到有效的UP/CANCEL，需在此按取消语义结束并释放父容器拦截。
+        if (!enabled) finishStroke()
+    }
+
     private fun drawSignature(canvas: Canvas) {
         strokes.forEach {
             paint.strokeWidth = it.width

@@ -103,6 +103,8 @@ class SignPadCalibrationTest {
             val pad = SignPadView(instrumentation.targetContext)
             pad.layout(0, 0, 1200, 160)
             pad.strokeWidth = 32f
+            // 使用固定dp/ms尺度，像素对比断言不能依赖测试设备的屏幕密度。
+            pad.velocityReference = 1f
             block(pad)
         }
     }

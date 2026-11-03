@@ -8,7 +8,9 @@
 
 动态模式采用 android-signaturepad 的四点滑窗、距离加权三次控制点，`CubicCurve` 生成曲线，`StrokeWidthModel` 计算速度/压力目标宽度，`VariableStroke` 以t³插值渲染每段。旧平方响应、额外宽度滤波和距离起笔包络已移除。尾段预览使用模型快照，已完成笔画保存实际轮廓。
 
-速度型笔触的最终轮廓还限制笔宽相对路程的增长，并禁止成熟尾段回粗；实际落成的宽度供下一段使用，避免起步与停顿生成突兀大圆。纯压力与固定模式不加此约束。
+速度型笔触的最终轮廓限制笔宽相对路程的增长，并保留两倍最大笔宽范围的末端曲线以便重建。离开末端范围才提交固定轮廓，末端快照的宽度上限只降不升，防止多次减速MOVE提前形成粗尾。纯压力与固定模式不加此约束。
+
+速度参与模式在没有移动时，按下预览和完成点按也使用最小宽度，与移动起笔保持一致，避免先显示粗圆点再突然变为细线。纯压力模式保留原地加压，固定模式使用配置宽度。
 
 ```mermaid
 flowchart LR
@@ -37,6 +39,8 @@ flowchart LR
 - `SignPadView.velocityReference`：速度尺度（dp/ms，默认1/density，使物理尺度等效上游1px/ms），随笔配置锁定。
 - [当前动态笔触规格](spec/reference-brush.md)
 - [首尾宽度规则](spec/endpoint-width.md)
+- [接触圆点与起笔宽度](spec/contact-width.md)
+- [末端轮廓、中断与小高度布局](spec/review-fixes.md)
 - [上游来源与许可](references/signaturepad/README.md)
 - [笔宽与响应校准](spec/pen-calibration.md)
 - [压力与动态笔锋规格](spec/dynamics.md)
